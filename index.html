@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<style>
+body {
+  font-size: 14px;
+  font-family: sans-serif !important;
+}
+h1 {
+  font-weight: bold;
+  letter-spacing: -2px;
+}
+.wrap {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -ms-word-break: break-all;
+  word-break: break-word;
+  min-width: 100px;
+}
+.container {
+  max-width: 800px;
+  padding: 0;
+}
+header {
+  padding: 30px;
+  background: rgba(0,0,0,0.03);
+}
+main {
+  padding: 20px;
+}
+.field {
+  border: none;
+  font-size: 14px;
+  background: rgba(0,0,0,0.8);
+  color: whitesmoke;
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+  outline: none;
+}
+h5 {
+  font-weight: bold;
+  font-size: 16px;
+}
+td {
+  font-size: 14px;
+}
+a.light {
+  font-weight: normal;
+  font-size: 12px;
+  text-decoration: underline;
+  color: gray;
+  margin: 0 10px;
+}
+</style>
+<script type="text/javascript" src="https://unpkg.com/bsv@0.30.0/bsv.min.js"></script>
+<script>
+const bip44 = "m/44'/0'/0'/0";
+const derive = (xpriv, index) => {
+  let next = bip44 + "/" + index
+  let xpriv2 = xpriv.deriveChild(next)
+  let xpub2 = bsv.HDPublicKey.fromHDPrivateKey(xpriv2)
+  let priv2 = xpriv2.privateKey;
+  let pub2 = xpriv2.publicKey;
+  let address2 = xpriv2.privateKey.toAddress();
+  return {
+    id: index,
+    xpriv: xpriv2.toString(),
+    xpub: xpub2.toString(),
+    priv: priv2.toString(),
+    pub: pub2.toString(),
+    address: address2.toString()
+  }
+}
+const buttonpage = (key) => {
+  let payload = {
+    "to": key.address,
+    "editable": true,
+    "currency": "USD",
+    "type": "tip"
+  }
+  let str = JSON.stringify(payload);
+  let b64 = btoa(str)
+  return "https://button.bitdb.network/#" + b64;
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const xpriv = bsv.HDPrivateKey.fromRandom();
+  document.querySelector("#xpriv .field").value = xpriv.toString();
+  for(let i=0; i<100; i++) {
+    let key = derive(xpriv, i)
+    let tr = document.createElement("tr")
+    tr.innerHTML = `<td class='wrap'>${bip44}/${i}</td><td class='wrap'>${key.address}</td><td><a target='_blank' href='${buttonpage(key)}'>send money</a></td>`;
+    document.querySelector("#addrs").appendChild(tr)
+  }
+})
+</script>
+</head>
+<body>
+<div class='container'>
+  <header>
+    <h1>bitcoin random xpriv generator</h1>
+    <div class='subtitle'>powered by <a target='_blank' href='https://github.com/moneybutton/bsv'>bsv.js</a></div>
+    <br>
+    <div id='xpriv' class='wrap'>
+      <h5>Generated seed xpriv:</h5>
+      <textarea class='field'></textarea>
+      <div class='subtitle'>Don't forget to copy and back up the xpriv before sending any money to the derived addresses!</div>
+    </div>
+  </header>
+  <main>
+    <h5>bip44 derived addresses <a href='https://docs.moneybutton.com/docs/bsv-hd-private-key.html#wallet-paths' class='light' target="_blank">what is bip44?</a></h5>
+    <table class='table' id='addrs'>
+    </table>
+  </main>
+</div>
+</body>
+</html>
