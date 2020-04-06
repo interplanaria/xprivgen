@@ -91,15 +91,23 @@ const buttonpage = (key) => {
   let b64 = btoa(str)
   return "https://button.bitdb.network/#" + b64;
 }
-document.addEventListener("DOMContentLoaded", () => {
-  const xpriv = bsv.HDPrivateKey.fromRandom();
-  document.querySelector("#xpriv .field").value = xpriv.toString();
+const generate = (xpriv) => {
+  document.querySelector("#addrs").innerHTML = "";
   for(let i=0; i<100; i++) {
     let key = derive(xpriv, i)
     let tr = document.createElement("tr")
     tr.innerHTML = `<td class='wrap'>${bip44}/${i}</td><td class='wrap'>${key.address}</td><td><a target='_blank' href='${buttonpage(key)}'>send money</a></td>`;
     document.querySelector("#addrs").appendChild(tr)
   }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const xpriv = bsv.HDPrivateKey.fromRandom();
+  generate(xpriv)
+  document.querySelector("#xpriv .field").value = xpriv.toString();
+  document.querySelector(".field").addEventListener("input", (e) => {
+    let xpriv = bsv.HDPrivateKey.fromString(e.target.value.trim());
+    generate(xpriv)
+  })
 })
 </script>
 </head>
