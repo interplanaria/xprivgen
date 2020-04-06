@@ -60,6 +60,22 @@ a.ribbon {
   top: 0;
   right: 0;
 }
+.align-right {
+  text-align: right;
+}
+button {
+  -webkit-appearance: none;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  border: none;
+  padding: 5px 20px;
+  font-size: 12px;
+  outline: none;
+}
+.subtitle {
+  padding: 10px 0;
+  color: rgba(0,0,0,0.7);
+}
 </style>
 <script type="text/javascript" src="https://unpkg.com/bsv@0.30.0/bsv.min.js"></script>
 <script>
@@ -93,6 +109,7 @@ const buttonpage = (key) => {
 }
 const generate = (xpriv) => {
   document.querySelector("#addrs").innerHTML = "";
+  document.querySelector("#xpriv .field").value = xpriv.toString();
   for(let i=0; i<100; i++) {
     let key = derive(xpriv, i)
     let tr = document.createElement("tr")
@@ -103,7 +120,15 @@ const generate = (xpriv) => {
 document.addEventListener("DOMContentLoaded", () => {
   const xpriv = bsv.HDPrivateKey.fromRandom();
   generate(xpriv)
-  document.querySelector("#xpriv .field").value = xpriv.toString();
+  document.querySelector("#generate").addEventListener("click", (e) => {
+    const xpriv = bsv.HDPrivateKey.fromRandom();
+    generate(xpriv)
+  })
+  document.querySelector("#paste").addEventListener("click", (e) => {
+    let textarea = document.querySelector("#xpriv .field");
+    textarea.value = "";
+    textarea.focus();
+  })
   document.querySelector(".field").addEventListener("input", (e) => {
     let xpriv = bsv.HDPrivateKey.fromString(e.target.value.trim());
     generate(xpriv)
@@ -117,11 +142,14 @@ document.addEventListener("DOMContentLoaded", () => {
   <header>
     <h1>bitcoin random xpriv generator</h1>
     <div class='subtitle'>powered by <a target='_blank' href='https://github.com/moneybutton/bsv'>bsv.js</a></div>
-    <br>
     <div id='xpriv' class='wrap'>
       <h5>Generated seed xpriv:</h5>
-      <textarea class='field'></textarea>
-      <div class='subtitle'>Don't forget to copy and back up the xpriv before sending any money to the derived addresses!</div>
+      <textarea class='field' placeholder="paste in an xpriv to generate addresses"></textarea>
+      <div class='align-right'>
+        <button id='paste'>Paste Existing Xpriv</button>
+        <button id='generate'>Generate New</button>
+      </div>
+      <div class='subtitle align-right'>Don't forget to copy and back up the xpriv before sending any money to the derived addresses!</div>
     </div>
   </header>
   <main>
